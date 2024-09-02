@@ -1,37 +1,27 @@
-name: Add resources
+name: Detect Changes and Trigger Workflow
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  trigger_add_resources:
+  detect_changes:
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 
-          
-      - name: Set Files Variable
-        id: files
+
+      - name: Detect Changed Files
+        id: changes
         run: |
-          echo "##[group]Extracting modified files"
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "FILES=$FILES"
-          echo "##[endgroup]"
+          echo "Changed files: $FILES"
           echo "::set-output name=files::$FILES"
 
-      - name: Trigger Send Resource
-        # uses: peter-evans/repository-dispatch@v3
-        # with:
-        #   token: ${{ secrets.MY_GITHUB_TOKEN }}
-        #   repository: UBB-resources-project/website_ubb
-        #   event-type: add-resources-event
-        #   client-payload: '{"ref": "workflow_resources", "files": ${{ steps.files.outputs.files }}}'
+      - name: Trigger the Processing Workflow
         run: |
           curl -X POST \
-          -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/UBB-resources-project/website_ubb/dispatches \
-          -d '{"event_type": "add-resources-event", "client_payload": {"ref": "workflow_resources", "files": ${{ steps.files.outputs.files }}}}'
+            -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/yourusername/yourrepo/actions/workflows/process_files.yml/dispatches \
+            -d '{"ref":"workflow_resources", "inputs": {"files": ${{ steps.changes.outputs.files }}}}'
