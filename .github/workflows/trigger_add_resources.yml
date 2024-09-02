@@ -18,13 +18,10 @@ jobs:
         run: |
           echo "##[group]Extracting modified files"
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          
-          # Construct full GitHub URL for each file, and URL encode spaces
-          FULL_URLS=$(echo "$FILES" | while read -r FILE; do
-            ENCODED_FILE=$(echo "$FILE" | sed 's/ /%20/g')
-            echo "https://github.com/UBB-resources-project/Resources/blob/test_add_resources/$ENCODED_FILE"
-          done | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          
+
+          # Construct full GitHub URL for each file
+          FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/test_add_resources/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
           echo "FULL_URLS=$FULL_URLS"
           echo "##[endgroup]"
           echo "::set-output name=files::$FULL_URLS"
