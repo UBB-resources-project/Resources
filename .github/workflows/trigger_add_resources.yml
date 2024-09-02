@@ -17,7 +17,7 @@ jobs:
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' '|')
           echo "FILES=$FILES"
           echo "##[endgroup]"
       
