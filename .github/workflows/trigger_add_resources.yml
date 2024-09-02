@@ -23,7 +23,7 @@ jobs:
           echo "::set-output name=files::$FILES"
 
           # Decode files using latin1 and utf-8
-          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys; print(sys.stdin.read().encode('latin1').decode('utf-8').strip())")
+          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, json; files = sys.stdin.read(); decoded_files = [f.encode('latin1').decode('utf-8') for f in json.loads(files)]; print(json.dumps(decoded_files))")
       
           # Print the decoded filenames for debugging
           echo "Decoded Files=$DECODED_FILES"
