@@ -26,20 +26,25 @@ jobs:
           cat files_to_send.txt
           echo "this worked"
           # Safely set the environment variable with diacritics
-          printf "FILES_TO_SEND=%s\n" "$FILES" >> $GITHUB_ENV
-
+          FILES_TO_SEND=$(echo -n "$FILES" | base64)
+          echo "FILES_TO_SEND=$FILES_TO_SEND" >> $GITHUB_ENV
 
       - name: Debug Files to Send
         run: |
           cat files_to_send.txt
           echo "FILES_TO_SEND=$FILES_TO_SEND"
+          echo "Decoded FILES_TO_SEND=$(echo $FILES_TO_SEND | base64 --decode)"
 
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
           FILES_TO_SEND: ${{ env.FILES_TO_SEND }}
         run: |
-          if [ -z "$FILES_TO_SEND" ]; then
+          # Decode the files before sending
+          DECODED_FILES=$(echo $FILES_TO_SEND | base64 --decode)
+          echo "Decoded FILES_TO_SEND=$DECODED_FILES"
+
+          if [ -z "$DECODED_FILES" ]; then
             echo "No files found to send. Exiting."
             exit 1
           fi
@@ -47,4 +52,4 @@ jobs:
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-          -d '{"ref":"workflow_resources", "inputs": {"files": "'"$FILES_TO_SEND"'"}}'
+          -d '{"ref":"workflow_resources", "inputs": {"files": "'"$DECODED_FILES"'"}}'
