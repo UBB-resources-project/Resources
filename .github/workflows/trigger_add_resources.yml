@@ -27,6 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_JSON=${{ steps.files.outputs.files }}
+          echo $FILES_JSON
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
