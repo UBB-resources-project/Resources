@@ -20,8 +20,13 @@ jobs:
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           echo "FILES=$FILES"
           echo "##[endgroup]"
+      
+          # Write the files to a text file
           echo "$FILES" > files_to_send.txt
-          echo "FILES_TO_SEND=$FILES" >> $GITHUB_ENV
+      
+          # Safely set the environment variable with diacritics
+          printf "FILES_TO_SEND=%s\n" "$FILES" >> $GITHUB_ENV
+
 
       - name: Debug Files to Send
         run: |
