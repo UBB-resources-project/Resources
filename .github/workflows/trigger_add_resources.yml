@@ -23,7 +23,8 @@ jobs:
       
           # Write the files to a text file
           echo "$FILES" > files_to_send.txt
-      
+          cat files_to_send.txt
+          echo "this worked"
           # Safely set the environment variable with diacritics
           printf "FILES_TO_SEND=%s\n" "$FILES" >> $GITHUB_ENV
 
