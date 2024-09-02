@@ -27,10 +27,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_JSON=${{ steps.files.outputs.files }}
-          echo $FILES_JSON
+          echo "Original FILES_JSON=${FILES_JSON}"
+      
+          # Replace single backslashes with double backslashes for proper JSON formatting
+          ESCAPED_FILES_JSON=$(echo $FILES_JSON | sed 's/\\/\\\\/g')
+          echo "Escaped FILES_JSON=${ESCAPED_FILES_JSON}"
+      
+          # Trigger the dispatch with properly escaped JSON
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-          -d "{\"ref\":\"workflow_resources\", \"inputs\": {\"files\": $FILES_JSON}}"
+          -d "{\"ref\":\"workflow_resources\", \"inputs\": {\"files\": $ESCAPED_FILES_JSON}}"
+
 
