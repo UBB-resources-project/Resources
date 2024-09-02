@@ -41,7 +41,8 @@ jobs:
         id: prepare_json
         run: |
           DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
-          JSON_PAYLOAD=$(jq -n --arg files "$DECODED_FILES" '{"ref": "workflow_resources", "inputs": {"files": $files}}')
+          BRANCH="workflow_resources"  # The branch where the workflow is defined
+          JSON_PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg files "$DECODED_FILES" '{"ref": $ref, "inputs": {"files": $files}}')
           echo "JSON_PAYLOAD=$JSON_PAYLOAD"
           echo "JSON_PAYLOAD=$JSON_PAYLOAD" >> $GITHUB_ENV
 
