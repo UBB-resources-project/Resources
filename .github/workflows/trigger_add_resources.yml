@@ -1,0 +1,29 @@
+name: Add resources
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  trigger_add_resources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Files Variable
+        id: files
+        run: |
+          echo "##[group]Extracting modified files"
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          echo "FILES=$FILES"
+          echo "##[endgroup]"
+          echo "::set-output name=files::$FILES"
+          
+      - name: Trigger Send Resource
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FILES_TO_SEND="${{ steps.files.outputs.files }}"
+          curl -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
+          -d '{"ref":"workflow_resource", "inputs": {"files": "'"$FILES_TO_SEND"'"}}'
