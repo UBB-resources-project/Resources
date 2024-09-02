@@ -22,7 +22,7 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
 
-          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, unicodedata; print(unicodedata.normalize('NFC', sys.stdin.read().strip()))")
+          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys; print(sys.stdin.read().encode('latin1').decode('utf-8').strip())")
       
           # Print the decoded filenames for debugging
           echo "Decoded Files=$DECODED_FILES"
