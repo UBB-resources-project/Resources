@@ -1,4 +1,4 @@
-name: Trigger Add Resources
+name: Add resources
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ jobs:
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n")[:-1]')
           echo "FILES=$FILES"
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
@@ -27,4 +27,4 @@ jobs:
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           event-type: add-resources-event
-          client-payload: '{"files": "${{ steps.files.outputs.files }}"}'
+          client-payload: '{"files": ${{ steps.files.outputs.files }}}'
