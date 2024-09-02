@@ -27,18 +27,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_JSON=${{ steps.files.outputs.files }}
-          echo "Original FILES_JSON=$FILES_JSON"
 
-          # URL encode the JSON string
-          ENCODED_JSON=$(python3 -c 'import urllib.parse, json, sys; print(urllib.parse.quote(json.dumps(json.loads(sys.argv[1]))))' "$FILES_JSON")
+          # Print the original JSON string for debugging
+          echo "Original FILES_JSON=$FILES_JSON"
       
-          # Print the encoded JSON for debugging
-          echo "Encoded JSON=$ENCODED_JSON"
-      
-          # Trigger the workflow dispatch with the URL encoded JSON
+          # Trigger the workflow dispatch with the encoded JSON
           curl -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
-            --data-urlencode "ref=workflow_resources" \
-            --data-urlencode "inputs[files]=$ENCODED_JSON" \
-            https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches
+            --data-urlencode "files=$FILES_JSON" \
+            https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
+            -d "{\"ref\":\"workflow_resources\"}"
