@@ -28,6 +28,7 @@ jobs:
           
           # Encode the string using base64
           FILES_BASE64=$(printf "%s" "$FILES_JOINED" | base64 -w 0)
+          echo $FILES_BASE64
           
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
