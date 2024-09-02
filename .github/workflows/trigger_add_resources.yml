@@ -27,5 +27,5 @@ jobs:
             curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/yourusername/yourrepo/actions/workflows/process_files.yml/dispatches \
+            https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
             -d '{"ref":"workflow_resources", "inputs": {"files": ${{ steps.changes.outputs.files }}}}'
