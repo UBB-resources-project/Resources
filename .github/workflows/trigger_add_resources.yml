@@ -19,7 +19,7 @@ jobs:
           
       - name: Trigger Send Resource
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_TO_SEND="${{ steps.files.outputs.files }}"
           curl -X POST \
