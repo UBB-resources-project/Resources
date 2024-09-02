@@ -29,6 +29,11 @@ jobs:
           # Encode the string using base64
           FILES_BASE64=$(printf "%s" "$FILES_JOINED" | base64 -w 0)
           echo $FILES_BASE64
+
+          FILES_DECODED=$(echo "$FILES_BASE64" | base64 --decode)
+          # Output for debugging
+          echo "Decoded Files:"
+          echo $FILES_DECODED
           
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
