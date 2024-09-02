@@ -20,19 +20,25 @@ jobs:
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           echo "FILES=$FILES"
           echo "##[endgroup]"
-          echo "::set-output name=files::$FILES"
-          
+          echo "$FILES" > files_to_send.txt
+          echo "FILES_TO_SEND=$FILES" >> $GITHUB_ENV
+
+      - name: Debug Files to Send
+        run: |
+          cat files_to_send.txt
+          echo "FILES_TO_SEND=$FILES_TO_SEND"
+
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          FILES_TO_SEND: ${{ env.FILES_TO_SEND }}
         run: |
-          FILES_TO_SEND=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "FILES_TO_SEND=${{ steps.files.outputs.files }}"
-          echo "FILES_TO_SEND=${{ steps.files.outputs.files }}" > /dev/null
-          cat /dev/null
+          if [ -z "$FILES_TO_SEND" ]; then
+            echo "No files found to send. Exiting."
+            exit 1
+          fi
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
           -d '{"ref":"workflow_resources", "inputs": {"files": "'"$FILES_TO_SEND"'"}}'
-
