@@ -31,7 +31,7 @@ jobs:
         #   client-payload: '{"ref": "workflow_resources", "files": ${{ steps.files.outputs.files }}}'
         run: |
           curl -X POST \
-          -H "Authorization: token YOUR_TOKEN" \
+          -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/dispatches \
           -d '{"event_type": "add-resources-event", "client_payload": {"ref": "workflow_resources", "files": ${{ steps.files.outputs.files }}}}'
