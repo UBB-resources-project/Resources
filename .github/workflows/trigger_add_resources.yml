@@ -17,18 +17,26 @@ jobs:
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n")[:-1]')
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "FILES=$FILES"
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
-          
+
+      - name: Debug the JSON Payload
+        run: |
+          FILES_TO_SEND="${{ steps.files.outputs.files }}"
+          JSON_PAYLOAD='{"ref":"workflow_resources", "inputs": {"files": '"$FILES_TO_SEND"'}}'
+          echo "JSON Payload: $JSON_PAYLOAD"
+
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_TO_SEND="${{ steps.files.outputs.files }}"
+          JSON_PAYLOAD='{"ref":"workflow_resources", "inputs": {"files": '"$FILES_TO_SEND"'}}'
+          echo "Sending the following JSON Payload: $JSON_PAYLOAD"
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-          -d '{"ref":"workflow_resources", "inputs": {"files": "${{ steps.files.outputs.files }}"}}'
+          -d "$JSON_PAYLOAD"
