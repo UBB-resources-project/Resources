@@ -27,4 +27,4 @@ jobs:
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           event-type: add-resources-event
-          client-payload: '{"files": ${{ steps.files.outputs.files }}}'
+          client-payload: '{"files": "${{ steps.files.outputs.files }}", "ref": "workflow_resources"}'
