@@ -17,7 +17,7 @@ jobs:
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | paste -sd ',' -)
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "FILES=$FILES"
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
