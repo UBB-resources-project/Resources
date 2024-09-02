@@ -29,6 +29,7 @@ jobs:
           FILES_TO_SEND="${{ steps.files.outputs.files }}"
           echo "FILES_TO_SEND=${{ steps.files.outputs.files }}"
           echo "FILES_TO_SEND=${{ steps.files.outputs.files }}" > /dev/null
+          cat /dev/null
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
