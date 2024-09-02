@@ -22,10 +22,10 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
 
-          ESCAPED_FILES=$(echo "$FILES" | python3 -c 'import json, sys; print(json.dumps(sys.stdin.read().strip().split()))')
-          # Debug: print the escaped JSON to see if it's correct
-          echo "Escaped Files JSON=$ESCAPED_FILES"
-
+          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, codecs; print(codecs.decode(sys.stdin.read().strip(), 'unicode_escape'))")
+          # Print the decoded filenames for debugging
+          echo "Decoded Files=$DECODED_FILES"
+          
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
