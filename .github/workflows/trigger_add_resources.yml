@@ -25,7 +25,7 @@ jobs:
       - name: Decode Filenames
         id: decode_files
         run: |
-          DECODED_FILES=$(python3 scripts/decode_filenames.py "${{ steps.files.outputs.files }}")
+          DECODED_FILES=$(python3 decode_filenames.py "${{ steps.files.outputs.files }}")
           echo "Decoded Files=$DECODED_FILES"
           echo "::set-output name=decoded_files::$DECODED_FILES"
 
