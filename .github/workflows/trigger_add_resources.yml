@@ -17,7 +17,7 @@ jobs:
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' '|')
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
 
           echo "FILES=$FILES"
           echo "##[endgroup]"
@@ -27,22 +27,23 @@ jobs:
           cat files_to_send.txt
           echo "this worked"
           # Safely set the environment variable with diacritics
-          FILES_TO_SEND=$(echo -n "$FILES" | base64)
+          FILES_TO_SEND=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$FILES")
           echo "FILES_TO_SEND=$FILES_TO_SEND" >> $GITHUB_ENV
 
       - name: Debug Files to Send
         run: |
           cat files_to_send.txt
           echo "FILES_TO_SEND=$FILES_TO_SEND"
-          echo "Decoded FILES_TO_SEND=$(echo $FILES_TO_SEND | base64 --decode)"
-
+          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
+          echo "Decoded FILES_TO_SEND=$DECODED_FILES"
+          
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
           FILES_TO_SEND: ${{ env.FILES_TO_SEND }}
         run: |
           # Decode the files before sending
-          DECODED_FILES=$(echo $FILES_TO_SEND | base64 --decode | tr '|' '\n')
+          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
           echo "Decoded FILES_TO_SEND=$DECODED_FILES"
 
           if [ -z "$DECODED_FILES" ]; then
