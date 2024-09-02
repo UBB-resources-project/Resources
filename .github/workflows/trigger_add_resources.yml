@@ -26,9 +26,9 @@ jobs:
           echo "$FILES" > files_to_send.txt
           cat files_to_send.txt
           echo "this worked"
-          # Safely set the environment variable with diacritics
+          # URL encode the files
           FILES_TO_SEND=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$FILES")
-          echo "FILES_TO_SEND=$FILES_TO_SEND" >> $GITHUB_ENV
+          echo "FILES_TO_SEND=$FILES_TO_SEND"
 
       - name: Debug Files to Send
         run: |
@@ -37,31 +37,26 @@ jobs:
           DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
           echo "Decoded FILES_TO_SEND=$DECODED_FILES"
 
-      - name: Prepare JSON Payload
-        id: prepare_json
-        run: |
-          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
-          BRANCH="workflow_resources"  # The branch where the workflow is defined
-          JSON_PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg files "$DECODED_FILES" '{"ref": $ref, "inputs": {"files": $files}}')
-          echo "JSON_PAYLOAD=$JSON_PAYLOAD"
-          echo "JSON_PAYLOAD=$JSON_PAYLOAD" >> $GITHUB_ENV
-
-      - name: Debug JSON Payload
-        run: |
-          echo "Prepared JSON Payload: ${{ env.JSON_PAYLOAD }}"
-          
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          JSON_PAYLOAD: ${{ env.JSON_PAYLOAD }}
         run: |
+          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
+          BRANCH="workflow_resources"  # The branch where the workflow is defined
+          
+          # Construct JSON payload
+          JSON_PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg files "$DECODED_FILES" '{"ref": $ref, "inputs": {"files": $files}}')
+          
+          echo "Constructed JSON Payload: $JSON_PAYLOAD"
+
           if [ -z "$JSON_PAYLOAD" ]; then
             echo "No JSON payload found. Exiting."
             exit 1
           fi
+          
+          # Send JSON payload
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
           -d "$JSON_PAYLOAD"
-
