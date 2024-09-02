@@ -31,4 +31,4 @@ jobs:
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-          -d '{"ref":"main", "inputs": {"files": "'"$FILES_TO_SEND"'"}}'
+          -d '{"ref":"workflow_resources", "inputs": {"files": "'"$FILES_TO_SEND"'"}}'
