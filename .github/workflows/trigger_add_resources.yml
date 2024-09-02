@@ -29,4 +29,3 @@ jobs:
           repository: UBB-resources-project/website_ubb
           event-type: add-resources-event
           client-payload: '{"ref": "workflow_resources", "files": ${{ steps.files.outputs.files }}}'
-          
