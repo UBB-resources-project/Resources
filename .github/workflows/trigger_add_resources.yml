@@ -19,13 +19,16 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           echo "FILES=$FILES"
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
-                            
-          python3 -c "import sys; print('Original FILES:', sys.argv[1].encode('latin1').decode('utf-8'))" "$FILES"
-
+          
+          FILES_JOINED=$(printf "%s\n" "$FILES")
+          
+          # Encode the string using base64
+          FILES_BASE64=$(printf "%s" "$FILES_JOINED" | base64 -w 0)
+          
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
