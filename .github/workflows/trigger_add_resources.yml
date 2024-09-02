@@ -24,16 +24,7 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
           
-          FILES_JOINED=$(printf "%s\n" "$FILES")
-          
-          # Encode the string using base64
-          FILES_BASE64=$(printf "%s" "$FILES_JOINED" | base64 -w 0)
-          echo $FILES_BASE64
-
-          FILES_DECODED=$(echo "$FILES_BASE64" | base64 --decode)
-          # Output for debugging
-          echo "Decoded Files:"
-          echo $FILES_DECODED
+          python3 -c "import sys; print('Original FILES:', sys.argv[1].encode('latin1').decode('utf-8'))" "$FILES"
           
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
