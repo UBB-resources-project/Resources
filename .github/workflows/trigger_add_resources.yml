@@ -26,7 +26,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          FILES_TO_SEND="${{ steps.files.outputs.files }}"
+          FILES_TO_SEND=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           echo "FILES_TO_SEND=${{ steps.files.outputs.files }}"
           echo "FILES_TO_SEND=${{ steps.files.outputs.files }}" > /dev/null
           cat /dev/null
