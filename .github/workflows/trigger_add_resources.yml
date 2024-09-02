@@ -21,9 +21,8 @@ jobs:
           echo "FILES=$FILES"
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
-
-          # Decode files using latin1 and utf-8
-          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, json; files = sys.stdin.read(); decoded_files = [f.encode('latin1').decode('utf-8') for f in json.loads(files)]; print(json.dumps(decoded_files))")
+          
+          DECODED_FILES=$(python3 -c "import sys, json; print(json.dumps(json.loads(sys.argv[1])))" "$FILES")
       
           # Print the decoded filenames for debugging
           echo "Decoded Files=$DECODED_FILES"
