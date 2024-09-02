@@ -27,7 +27,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           FILES_JSON=${{ steps.files.outputs.files }}
-          
+          echo "Original FILES_JSON=$FILES_JSON"
+
           # URL encode the JSON string
           ENCODED_JSON=$(python3 -c 'import urllib.parse, json, sys; print(urllib.parse.quote(json.dumps(json.loads(sys.argv[1]))))' "$FILES_JSON")
       
