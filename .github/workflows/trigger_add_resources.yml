@@ -35,7 +35,7 @@ jobs:
       
           # Trigger the dispatch with properly escaped JSON
           curl -X POST \
-          -H "Authorization: token $MY_GITHUB_TOKEN" \
+          -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
           -d "{\"ref\":\"workflow_resources\", \"inputs\": {\"files\": $ESCAPED_FILES_JSON}}"
