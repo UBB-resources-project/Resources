@@ -18,44 +18,35 @@ jobs:
         run: |
           echo "##[group]Extracting modified files"
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
-
           echo "FILES=$FILES"
           echo "##[endgroup]"
-      
-          # Write the files to a text file
           echo "$FILES" > files_to_send.txt
-          cat files_to_send.txt
-          echo "this worked"
 
           # Directly set the environment variable without URL encoding
           printf "FILES_TO_SEND=%s\n" "$FILES" >> $GITHUB_ENV
-
 
       - name: Debug Files to Send
         run: |
           cat files_to_send.txt
           echo "FILES_TO_SEND=$FILES_TO_SEND"
-          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
-          echo "Decoded FILES_TO_SEND=$DECODED_FILES"
+          echo "Decoded FILES_TO_SEND=$FILES_TO_SEND"
 
       - name: Trigger Send Resource
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          FILES_TO_SEND: ${{ env.FILES_TO_SEND }}
         run: |
-          DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
-          BRANCH="workflow_resources"  # The branch where the workflow is defined
-          
-          # Construct JSON payload
-          JSON_PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg files "$DECODED_FILES" '{"ref": $ref, "inputs": {"files": $files}}')
-          
-          echo "Constructed JSON Payload: $JSON_PAYLOAD"
-
-          if [ -z "$JSON_PAYLOAD" ]; then
-            echo "No JSON payload found. Exiting."
+          if [ -z "$FILES_TO_SEND" ]; then
+            echo "No files found to send. Exiting."
             exit 1
           fi
           
-          # Send JSON payload
+          # Construct JSON payload directly
+          BRANCH="workflow_resources"  # The branch where the workflow is defined
+          JSON_PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg files "$FILES_TO_SEND" '{"ref": $ref, "inputs": {"files": $files}}')
+
+          echo "Constructed JSON Payload: $JSON_PAYLOAD"
+
           curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
