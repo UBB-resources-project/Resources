@@ -28,4 +28,4 @@ jobs:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           repository: UBB-resources-project/website_ubb
           event-type: add-resources-event
-          client-payload: '{"files": "${{ steps.files.outputs.files }}", "ref": "workflow_resources"}'
+          client-payload: '{"files": "${{ steps.files.outputs.files }}"}'
