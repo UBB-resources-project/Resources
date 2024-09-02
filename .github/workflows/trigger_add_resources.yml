@@ -26,5 +26,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
-          event-type: add-resources-event
+          event-type: manual-trigger
           client-payload: '{"files": ${{ steps.files.outputs.files }}, "ref": "workflow_resources"}'
