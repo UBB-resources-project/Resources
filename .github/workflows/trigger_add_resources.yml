@@ -22,6 +22,7 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
 
+          # Decode files using latin1 and utf-8
           DECODED_FILES=$(echo "$FILES" | python3 -c "import sys; print(sys.stdin.read().encode('latin1').decode('utf-8').strip())")
       
           # Print the decoded filenames for debugging
@@ -30,6 +31,6 @@ jobs:
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            --data-urlencode "files=$FILES" \
+            --data-urlencode "files=$DECODED_FILES" \
             https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-            -d "{\"ref\":\"workflow_resources\"}"
+            -d "{\"ref\":\"workflow_resources\", \"inputs\": {\"files\": \"$DECODED_FILES\"}}"
