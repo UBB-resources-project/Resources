@@ -26,9 +26,10 @@ jobs:
           echo "$FILES" > files_to_send.txt
           cat files_to_send.txt
           echo "this worked"
-          # URL encode the files
-          FILES_TO_SEND=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$FILES")
-          echo "FILES_TO_SEND=$FILES_TO_SEND"
+
+          # Directly set the environment variable without URL encoding
+          printf "FILES_TO_SEND=%s\n" "$FILES" >> $GITHUB_ENV
+
 
       - name: Debug Files to Send
         run: |
