@@ -46,6 +46,8 @@ jobs:
           DECODED_FILES=$(python3 -c "import urllib.parse, sys; print(urllib.parse.unquote(sys.argv[1]))" "$FILES_TO_SEND")
           echo "Decoded FILES_TO_SEND=$DECODED_FILES"
 
+          JSON_FILES=$(python3 -c "import json, sys; print(json.dumps(sys.argv[1]))" "$DECODED_FILES")
+
           if [ -z "$DECODED_FILES" ]; then
             echo "No files found to send. Exiting."
             exit 1
@@ -54,4 +56,4 @@ jobs:
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-          -d '{"ref":"workflow_resources", "inputs": {"files": "'"$DECODED_FILES"'"}}'
+          -d '{"ref":"workflow_resources", "inputs": {"files": "'"$JSON_FILES"'"}}'
