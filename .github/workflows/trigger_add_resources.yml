@@ -11,8 +11,8 @@ jobs:
       - name: Check Out Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-          
+          fetch-depth: 0 
+
       - name: Set Files Variable
         id: files
         run: |
@@ -24,9 +24,12 @@ jobs:
 
       - name: Trigger Send Resource
         run: |
-          FILE=${{ steps.files.outputs.files }}
+          FILES=${{ steps.files.outputs.files }}
+          echo "Files to be sent: $FILES"
+
+          # Pass the files as a string, ensuring it is quoted properly
           curl -X POST \
             -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/UBB-resources-project/website_ubb/actions/workflows/add_resources.yml/dispatches \
-            -d "{\"ref\": \"workflow_resources\", \"inputs\": {\"files\": \"$FILE\"}}"
+            -d "{\"ref\": \"workflow_resources\", \"inputs\": {\"files\": \"$FILES\"}}"
