@@ -41,7 +41,7 @@ jobs:
           FILES_TO_SEND: ${{ env.FILES_TO_SEND }}
         run: |
           # Decode the files before sending
-          DECODED_FILES=$(echo $FILES_TO_SEND | base64 --decode)
+          DECODED_FILES=$(echo $FILES_TO_SEND | base64 --decode | tr '|' '\n')
           echo "Decoded FILES_TO_SEND=$DECODED_FILES"
 
           if [ -z "$DECODED_FILES" ]; then
