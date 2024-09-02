@@ -25,7 +25,7 @@ jobs:
       - name: Trigger Add Resources Workflow in Another Repository
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: .github/workflows/add_resources.yml  # Name of the workflow file in the triggered repo
+          workflow: add_resources.yml  # Name of the workflow file in the triggered repo
           repo: UBB-resources-project/website_ubb  # Repository in which the workflow resides
           token: ${{ secrets.MY_GITHUB_TOKEN }}  # The token with access to the private repo
           ref: refs/heads/workflow_resources  # Branch in the target repo where the workflow exists
