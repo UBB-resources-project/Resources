@@ -22,7 +22,8 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FILES"
 
-          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, codecs; print(codecs.decode(sys.stdin.read().strip(), 'unicode_escape'))")
+          DECODED_FILES=$(echo "$FILES" | python3 -c "import sys, unicodedata; print(unicodedata.normalize('NFC', sys.stdin.read().strip()))")
+      
           # Print the decoded filenames for debugging
           echo "Decoded Files=$DECODED_FILES"
           
