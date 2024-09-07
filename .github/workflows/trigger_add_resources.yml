@@ -31,8 +31,8 @@ jobs:
               JSON=$(jq -n --arg name "Resource Name" \
                           --arg description "A detailed description of the resource." \
                           --argjson semester 1 \
-                          --arg subject "Subject Name" \
-                          --arg specialization "Specialization Name" \
+                          --arg subject "AI" \
+                          --arg specialization "AI EN" \
                           --argjson is_exam false \
                           --arg url "$URL" \
                           --arg keywords "keyword1, keyword2" \
