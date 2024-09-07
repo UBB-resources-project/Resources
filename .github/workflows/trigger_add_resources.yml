@@ -13,24 +13,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set Files Variable
-        id: files
+      - name: Build Json Objects
+        id: jsons
         run: |
           echo "##[group]Extracting modified files"
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
           # Construct full GitHub URL for each file
           FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/integration/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
-
-          echo "FULL_URLS=$FULL_URLS"
-          echo "::set-output name=files::$FULL_URLS"
-          echo "##[endgroup]"
-
-      - name: Build JSON Object for Each File
-        id: build_json
-        run: |
-          FULL_URLS=${{ steps.files.outputs.files }}
-          echo "FULL_URLS=$FULL_URLS"
 
           # Initialize an empty array to hold all JSON objects
           JSON_OBJECTS="[]"
@@ -63,9 +53,10 @@ jobs:
               JSON_OBJECTS=$(echo $JSON_OBJECTS | jq --argjson new_object "$JSON" '. + [$new_object]')
           done
 
-          # Output the final array of JSON objects
-          echo "$JSON_OBJECTS"
-          echo "::set-output name=json_data::$JSON_OBJECTS"
+          echo "JSON_OBJECTS=$JSON_OBJECTS"
+          echo "FULL_URLS=$FULL_URLS"
+          echo "::set-output name=files::$FULL_URLS"
+          echo "##[endgroup]"
 
       - name: Send JSON Objects to API
         run: |
