@@ -27,7 +27,7 @@ jobs:
           # Loop through each URL from the JSON array
           for URL in $(echo $FULL_URLS | jq -r '.[]'); do
               # Create a JSON object for each URL
-              JSON=$(jq -n --arg name "${URL: -50}" \
+              JSON=$(jq -n --arg name "${URL: -80}" \
                           --arg description "A detailed description of the resource." \
                           --argjson semester 1 \
                           --arg subject "AI" \
