@@ -64,4 +64,4 @@ jobs:
           curl -X POST \
             -H "Content-Type: application/json" \
             -d "$JSON_DATA" \
-            http://127.0.0.1:8000/workflows
+           https://2d61-2a02-2f08-2406-c400-7d94-5ea6-8c07-f287.ngrok-free.app/workflows
