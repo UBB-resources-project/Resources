@@ -1,4 +1,4 @@
-name: Add resources
+name: Trigger Add Resources
 
 on:
   pull_request:
@@ -11,20 +11,51 @@ jobs:
       - name: Check Out Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 
-          
-      - name: Set Files Variable
-        id: files
-        run: |
-          echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "FILES=$FILES"
-          echo "##[endgroup]"
-          echo "::set-output name=files::$FILES"
+          fetch-depth: 0
 
-      - name: Trigger Send Resource
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-          event-type: add-resources-event
-          client-payload: '{"files": "${{ steps.files.outputs.files }}"}'
+      - name: Build Json Objects
+        id: jsons
+        run: |
+          FILES=$(git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          
+          # Construct full GitHub URL for each file
+          FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/integration/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          # Initialize an empty array to hold all JSON objects
+          JSON_OBJECTS="[]"
+
+          # Loop through each URL from the JSON array
+          for URL in $(echo $FULL_URLS | jq -r '.[]'); do
+              # Create a JSON object for each URL
+              JSON=$(jq -n --arg name "${URL: -80}" \
+                          --arg description "A detailed description of the resource." \
+                          --argjson semester 1 \
+                          --arg subject "AI" \
+                          --arg specialization "AI EN" \
+                          --argjson is_exam false \
+                          --arg url "$URL" \
+                          --arg keywords "keyword1, keyword2" \
+                          --argjson vaults '[]' \
+                          '{
+                            "name": $name,
+                            "description": $description,
+                            "semester": $semester,
+                            "subject": $subject,
+                            "specialization": $specialization,
+                            "is_exam": $is_exam,
+                            "url": $url,
+                            "keywords": $keywords,
+                            "vaults": $vaults
+                          }')
+
+              # Add the new JSON object to the JSON_OBJECTS array
+              JSON_OBJECTS=$(echo $JSON_OBJECTS | jq --argjson new_object "$JSON" '. + [$new_object]')
+          done
+
+          echo "JSON_OBJECTS=$JSON_OBJECTS"
+          echo "::set-output name=files::$FULL_URLS"
+
+          curl -X POST \
+              -H "Content-Type: application/json" \
+              -d "$JSON_OBJECTS" \
+            https://2d61-2a02-2f08-2406-c400-7d94-5ea6-8c07-f287.ngrok-free.app/workflows
