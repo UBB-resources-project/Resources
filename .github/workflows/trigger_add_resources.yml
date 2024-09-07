@@ -1,4 +1,4 @@
-name: Add resources
+name: Trigger Add Resources
 
 on:
   pull_request:
@@ -11,20 +11,54 @@ jobs:
       - name: Check Out Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 
-          
+          fetch-depth: 0
+
       - name: Set Files Variable
         id: files
         run: |
           echo "##[group]Extracting modified files"
-          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "FILES=$FILES"
-          echo "##[endgroup]"
-          echo "::set-output name=files::$FILES"
+          FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
-      - name: Trigger Send Resource
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-          event-type: add-resources-event
-          client-payload: '{"files": "${{ steps.files.outputs.files }}"}'
+          # Construct full GitHub URL for each file
+          FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/test_add_resources/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "FULL_URLS=$FULL_URLS"
+          echo "##[endgroup]"
+          echo "::set-output name=files::$FULL_URLS"
+
+      - name: Build JSON Object
+        id: build_json
+        run: |
+          # Build JSON object
+          JSON_DATA=$(jq -n --arg name "Resource Name" \
+                            --arg description "A detailed description of the resource." \
+                            --argjson semester 1 \
+                            --arg subject "Subject Name" \
+                            --arg specialization "Specialization Name" \
+                            --argjson is_exam false \
+                            --arg url "https://someurl.com/resource" \
+                            --arg keywords "keyword1, keyword2" \
+                            --argjson vaults '[]' \
+                            '{
+                              "name": $name,
+                              "description": $description,
+                              "semester": $semester,
+                              "subject": $subject,
+                              "specialization": $specialization,
+                              "is_exam": $is_exam,
+                              "url": $url,
+                              "keywords": $keywords,
+                              "vaults": $vaults
+                            }')
+          
+          echo "JSON_DATA=$JSON_DATA"
+          echo "::set-output name=json_data::$JSON_DATA"
+
+      - name: Send JSON Object to API
+        run: |
+          JSON_DATA=${{ steps.build_json.outputs.json_data }}
+
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "$JSON_DATA" \
+            http://127.0.0.1:8000/workflows
