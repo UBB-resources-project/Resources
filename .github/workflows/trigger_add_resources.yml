@@ -29,30 +29,37 @@ jobs:
       - name: Build JSON Object for Each File
         id: build_json
         run: |
-          # Loop through each URL and build a JSON object for each one
           FULL_URLS=${{ steps.files.outputs.files }}
-          JSON_OBJECTS=$(echo $FULL_URLS | jq -r '.[]' | while read -r URL; do
-            jq -n --arg name "Resource Name" \
-                  --arg description "A detailed description of the resource." \
-                  --argjson semester 1 \
-                  --arg subject "Subject Name" \
-                  --arg specialization "Specialization Name" \
-                  --argjson is_exam false \
-                  --arg url "$URL" \
-                  --arg keywords "keyword1, keyword2" \
-                  --argjson vaults '[]' \
-                  '{
-                    "name": $name,
-                    "description": $description,
-                    "semester": $semester,
-                    "subject": $subject,
-                    "specialization": $specialization,
-                    "is_exam": $is_exam,
-                    "url": $url,
-                    "keywords": $keywords,
-                    "vaults": $vaults
-                  }'
-          done | jq -s '.')
+
+          # Initialize an empty array to hold all JSON objects
+          JSON_OBJECTS="[]"
+
+          # Loop through each URL and build a JSON object for each one, then accumulate them
+          for URL in $(echo $FULL_URLS | jq -r '.[]'); do
+            JSON=$(jq -n --arg name "Resource Name" \
+                        --arg description "A detailed description of the resource." \
+                        --argjson semester 1 \
+                        --arg subject "Subject Name" \
+                        --arg specialization "Specialization Name" \
+                        --argjson is_exam false \
+                        --arg url "$URL" \
+                        --arg keywords "keyword1, keyword2" \
+                        --argjson vaults '[]' \
+                        '{
+                          "name": $name,
+                          "description": $description,
+                          "semester": $semester,
+                          "subject": $subject,
+                          "specialization": $specialization,
+                          "is_exam": $is_exam,
+                          "url": $url,
+                          "keywords": $keywords,
+                          "vaults": $vaults
+                        }')
+
+            # Add this JSON object to the JSON_OBJECTS array
+            JSON_OBJECTS=$(echo $JSON_OBJECTS | jq --argjson new_object "$JSON" '. + [$new_object]')
+          done
           
           echo "JSON_OBJECTS=$JSON_OBJECTS"
           echo "::set-output name=json_data::$JSON_OBJECTS"
