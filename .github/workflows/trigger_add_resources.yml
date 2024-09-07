@@ -16,11 +16,7 @@ jobs:
       - name: Build Json Objects
         id: jsons
         run: |
-          # Fetch the pull request details
-          PR_URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files"
-          
-          # Fetch file details using GitHub CLI
-          FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files -q '.files[] | select(.status == "added") | .filename' | jq -R -s -c 'split("\n") | map(select(length > 0))')          
+          FILES=$(git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
           
           # Construct full GitHub URL for each file
           FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/integration/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
