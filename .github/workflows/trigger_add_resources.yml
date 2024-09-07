@@ -16,7 +16,6 @@ jobs:
       - name: Build Json Objects
         id: jsons
         run: |
-          echo "##[group]Extracting modified files"
           FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
           # Construct full GitHub URL for each file
@@ -28,7 +27,7 @@ jobs:
           # Loop through each URL from the JSON array
           for URL in $(echo $FULL_URLS | jq -r '.[]'); do
               # Create a JSON object for each URL
-              JSON=$(jq -n --arg name "Resource Name" \
+              JSON=$(jq -n --arg name "${URL: -50}" \
                           --arg description "A detailed description of the resource." \
                           --argjson semester 1 \
                           --arg subject "AI" \
@@ -38,7 +37,7 @@ jobs:
                           --arg keywords "keyword1, keyword2" \
                           --argjson vaults '[]' \
                           '{
-                            "name": $url,
+                            "name": $name,
                             "description": $description,
                             "semester": $semester,
                             "subject": $subject,
@@ -60,5 +59,3 @@ jobs:
               -H "Content-Type: application/json" \
               -d "$JSON_OBJECTS" \
             https://2d61-2a02-2f08-2406-c400-7d94-5ea6-8c07-f287.ngrok-free.app/workflows
-
-          echo "##[endgroup]"
