@@ -29,7 +29,7 @@ jobs:
       - name: Build JSON Object for Each File
         id: build_json
         run: |
-          FULL_URLS=${{ steps.files.outputs }}
+          FULL_URLS=${{ steps.files.outputs.files }}
           echo "FULL_URLS=$FULL_URLS"
 
           # Initialize an empty array to hold all JSON objects
@@ -59,12 +59,12 @@ jobs:
                             "vaults": $vaults
                           }')
 
-            # Add the new JSON object to the JSON_OBJECTS array
-            JSON_OBJECTS=$(echo $JSON_OBJECTS | jq --argjson new_object "$JSON" '. + [$new_object]')
+              # Add the new JSON object to the JSON_OBJECTS array
+              JSON_OBJECTS=$(echo $JSON_OBJECTS | jq --argjson new_object "$JSON" '. + [$new_object]')
           done
-          
+
+          # Output the final array of JSON objects
           echo "JSON_OBJECTS=$JSON_OBJECTS"
-          echo "::set-output name=json_data::$JSON_OBJECTS"
 
       - name: Send JSON Objects to API
         run: |
