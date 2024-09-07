@@ -26,35 +26,38 @@ jobs:
           echo "##[endgroup]"
           echo "::set-output name=files::$FULL_URLS"
 
-      - name: Build JSON Object
+      - name: Build JSON Object for Each File
         id: build_json
         run: |
-          # Build JSON object
-          JSON_DATA=$(jq -n --arg name "Resource Name" \
-                            --arg description "A detailed description of the resource." \
-                            --argjson semester 1 \
-                            --arg subject "Subject Name" \
-                            --arg specialization "Specialization Name" \
-                            --argjson is_exam false \
-                            --arg url "https://someurl.com/resource" \
-                            --arg keywords "keyword1, keyword2" \
-                            --argjson vaults '[]' \
-                            '{
-                              "name": $name,
-                              "description": $description,
-                              "semester": $semester,
-                              "subject": $subject,
-                              "specialization": $specialization,
-                              "is_exam": $is_exam,
-                              "url": $url,
-                              "keywords": $keywords,
-                              "vaults": $vaults
-                            }')
+          # Loop through each URL and build a JSON object for each one
+          FULL_URLS=${{ steps.files.outputs.files }}
+          JSON_OBJECTS=$(echo $FULL_URLS | jq -r '.[]' | while read -r URL; do
+            jq -n --arg name "Resource Name" \
+                  --arg description "A detailed description of the resource." \
+                  --argjson semester 1 \
+                  --arg subject "Subject Name" \
+                  --arg specialization "Specialization Name" \
+                  --argjson is_exam false \
+                  --arg url "$URL" \
+                  --arg keywords "keyword1, keyword2" \
+                  --argjson vaults '[]' \
+                  '{
+                    "name": $name,
+                    "description": $description,
+                    "semester": $semester,
+                    "subject": $subject,
+                    "specialization": $specialization,
+                    "is_exam": $is_exam,
+                    "url": $url,
+                    "keywords": $keywords,
+                    "vaults": $vaults
+                  }'
+          done | jq -s '.')
           
-          echo "JSON_DATA=$JSON_DATA"
-          echo "::set-output name=json_data::$JSON_DATA"
+          echo "JSON_OBJECTS=$JSON_OBJECTS"
+          echo "::set-output name=json_data::$JSON_OBJECTS"
 
-      - name: Send JSON Object to API
+      - name: Send JSON Objects to API
         run: |
           JSON_DATA=${{ steps.build_json.outputs.json_data }}
 
