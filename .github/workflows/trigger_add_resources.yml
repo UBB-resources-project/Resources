@@ -61,6 +61,8 @@ jobs:
         run: |
           JSON_DATA=${{ steps.build_json.outputs.json_data }}
 
+          echo $JSON_DATA
+
           curl -X POST \
             -H "Content-Type: application/json" \
             -d "$JSON_DATA" \
