@@ -23,8 +23,8 @@ jobs:
           FULL_URLS=$(echo $FILES | jq -r '.[]' | while read -r FILE; do echo "https://github.com/UBB-resources-project/Resources/blob/integration/$(echo "$FILE" | sed 's/ /%20/g')"; done | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
           echo "FULL_URLS=$FULL_URLS"
-          echo "##[endgroup]"
           echo "::set-output name=files::$FULL_URLS"
+          echo "##[endgroup]"
 
       - name: Build JSON Object for Each File
         id: build_json
@@ -64,13 +64,13 @@ jobs:
           done
 
           # Output the final array of JSON objects
-          echo "JSON_OBJECTS=$JSON_OBJECTS"
+          echo "$JSON_OBJECTS"
+          echo "::set-output name=json_data::$JSON_OBJECTS"
 
       - name: Send JSON Objects to API
         run: |
           JSON_DATA=${{ steps.build_json.outputs.json_data }}
-
-          echo $JSON_DATA
+          echo "$JSON_DATA"
 
           curl -X POST \
             -H "Content-Type: application/json" \
