@@ -60,7 +60,7 @@ jobs:
           echo "JSON_OBJECTS=$JSON_OBJECTS"
           echo "::set-output name=files::$FULL_URLS"
 
-          curl -X POST -H "Authorization: $AUTH_TOKEN" -H "Content-Type: application/json" -d "$JSON_OBJECTS" "$DJANGO_APP_URL/workflows"
+          curl -X POST -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -d "$JSON_OBJECTS" "$DJANGO_APP_URL/workflows"
 
           # curl -X POST \
           #   -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
