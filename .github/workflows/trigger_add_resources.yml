@@ -16,8 +16,6 @@ jobs:
       - name: Build Json Objects
         env:
           DJANGO_APP_URL: https://eager-regularly-beagle.ngrok-free.app
-          AUTH_USERNAME: ${{ secrets.DJANGO_AUTH_USERNAME }}
-          AUTH_PASSWORD: ${{ secrets.DJANGO_AUTH_PASSWORD }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
         id: jsons
         run: |
@@ -59,7 +57,5 @@ jobs:
 
           echo "JSON_OBJECTS=$JSON_OBJECTS"
           echo "::set-output name=files::$FULL_URLS"
-
-          # curl -X POST -H "Authorization: Token c7bd00edb927ff159557e5aecd7e79d11d285f56" -H "Content-Type: application/json" -d "$JSON_OBJECTS" "$DJANGO_APP_URL/workflows"
 
           curl -X POST -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -d "$JSON_OBJECTS" "$DJANGO_APP_URL/workflows"
