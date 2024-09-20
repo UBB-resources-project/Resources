@@ -58,4 +58,4 @@ jobs:
           curl -X POST \
               -H "Content-Type: application/json" \
               -d "$JSON_OBJECTS" \
-            https://2d61-2a02-2f08-2406-c400-7d94-5ea6-8c07-f287.ngrok-free.app/workflows
+            https://caa6-2a02-2f08-2406-c400-7d94-5ea6-8c07-f287.ngrok-free.app/
