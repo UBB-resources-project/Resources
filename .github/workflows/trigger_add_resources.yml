@@ -15,9 +15,10 @@ jobs:
 
       - name: Build Json Objects
         env:
-          DJANGO_APP_URL: https://eager-regularly-beagle.ngrok-free.app/
+          DJANGO_APP_URL: https://eager-regularly-beagle.ngrok-free.app
           AUTH_USERNAME: ${{ secrets.DJANGO_AUTH_USERNAME }}
           AUTH_PASSWORD: ${{ secrets.DJANGO_AUTH_PASSWORD }}
+          AUTH_TOKEN: ${{ secrets.DJANGO_AUTH_TOKEN }}
         id: jsons
         run: |
           FILES=$(git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -59,8 +60,10 @@ jobs:
           echo "JSON_OBJECTS=$JSON_OBJECTS"
           echo "::set-output name=files::$FULL_URLS"
 
-          curl -X POST \
-            -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
-            -H "Content-Type: application/json" \
-            -d "$JSON_OBJECTS" \
-            "$DJANGO_APP_URL"
+          curl -X POST -H "Authorization: $AUTH_TOKEN" -H "Content-Type: application/json" -d "$JSON_OBJECTS" "$DJANGO_APP_URL"
+
+          # curl -X POST \
+          #   -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
+          #   -H "Content-Type: application/json" \
+          #   -d "$JSON_OBJECTS" \
+          #   "$DJANGO_APP_URL"
